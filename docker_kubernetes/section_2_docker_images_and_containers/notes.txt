@@ -1,0 +1,115 @@
+Two main concepts in this module: Images & Containers
+
+What is an image?
+- An image is a template/blueprint for containers
+- It is actually the thing that contains the code + required tools runtimes
+- This gives the benefit of defining the environment once, but be able to spawn
+  multiple running processes via multiple containers
+- The image will be the actual package that can be shared while the container
+  will be the concrete running instance
+- So, "we run containers off images". This is the core fundamental concept
+
+How do we get an image?
+- We use an already existing image (official, pre-built from docker hub)
+- Create your own custom image (with Dockerfile based on another image)
+
+How to write a Dockerfile?
+- Start with the FROM instruction. This allows you to build your image
+  on a base image
+  FROM node
+- Use COPY to tell docker which files go into the image
+  COPY . /app
+- Use RUN to run a command (There is a caveat here. By default the commands are
+  run inside the working director - root directory)
+  RUN npm install
+- Because RUN executes the command in the default root directory, we add a work
+  directory using the WORKDIR instruction
+  ...
+  WORKDIR /app (all subsequent instructions run inside the WORKDIR)
+  ...
+  COPY . . (You're already in the /app dir!)
+  ...
+  RUN npm install (Runs inside /app)
+- Use EXPOSE instruction to expose the ports that you want, if any
+  EXPOSE 8080
+- Follow up question: Why don't you simply add "RUN node web.js" in the Dockerfile?
+  Because we would be executing the web.js file when the image is being built!
+  We don't want to start a process when the image is built. We only want to start
+  a process when a container is started
+- Use CMD to execute a command when a container is started. This is the place where
+  you ideally put commands like "node web.js". Therefore this will ideally be the
+  last instruction in a Dockerfile
+  CMD ["node", "web.js"]
+
+!!! IMPORTANT !!!
+Images are read-only, which means when we make a change to the source code repo,
+the image needs to be re-built to pick up the changes from the source code
+A more careful look into the Dockerfile makes this more evident as we "COPY . /app"
+our source code into the image but not any further changes made to the source code
+
+!!! IMPORTANT !!!
+Images are built using a layer based architecture and every instruction is a layer.
+This means, when an instruction in the Dockerfile is about to be executed, docker
+checks if the result of it is going to be the same as that of a previous build.
+If yes, docker simply uses the "cached" pieces. However, if docker realizes that the
+result of an instruction will vary from a previous build, it will make sure to run it
+and will also build all subsequent layers
+e.g., A good way to optimize our build process would be to place the "RUN npm install"
+instruction before the "COPY . /app" instruction. This way, the node modules are not
+built over and over again, for a simple change in source code.
+```
+FROM node:14
+WORKDIR /app
+COPY package.json /app      <- To check if "npm install" can be picked from cache
+                               No change in package.json means no need to re build
+RUN npm install             <- "npm install" comes before COPYing source code.
+COPY . /app
+EXPOSE 80
+CMD ["node", "web.js"]
+```
+
+Restarting a container
+- Keep in mind, docker run, creates a new container everytime the command is called
+- To avoid this and instead restart an existing container - docker start <container>
+  If you want to see output too, then use "docker start -a <container" to attach
+  stdout/stderr
+- By default only "docker run" attaches the stdout/stderr to the container, so the
+  first run only displays stuff to stdout/stderr. For subsequent wake-up runs, use
+  the "-a" flag to attach the stdout/stderr to the container to view output
+- By default "docker run" runs in attached mode (blocking your terminal from input)
+  By default "docker start" runs in detached mode (allowing you to use terminal)
+- You can use "-d" flag to switch to detach mode - "docker run -d <image>"
+  Once you get the id of the container, you can also attach to the running container
+  later by "docker attach <container>" or "docker start -a <container>"
+
+Entering Interactive Mode (STDIN/STDOUT)
+- By default, docker run runs in attached mode (blocking your terminal from input)
+  but even then, it doesn't allow you to interact with the container in the sense
+  that you can't type in commands to the container
+- Running docker run --help, reveals two important flags: -i and -t
+  -i: Allows you to interact with the container
+  -t: Allows a pseudo-tty (text input/output) to be allocated to the container
+- So, to enter interactive mode, you can use "docker run -it <image>"
+- Similarly to enter interactive mode, while restarting container, you can use
+  "docker start -ai <container>" (where "a" is for attach and "i" is for interactive)
+
+Removing Images and Containers
+- To remove an image, use "docker rmi <image>"
+- To remove a container, use "docker rm <container>"
+- Images belonging to a container can't be removed. You need to remove the container
+  first and then the image
+- To remove all containers, use "docker container prune"
+- To remove all images, use "docker image prune"
+- !!! HINT !!!
+  To run a container that automatically is removed after it's done, use
+  "docker run --rm <image>"
+
+Inspecting Images
+- docker image inspect <image>
+
+Copying files into and out of containers
+- docker cp <source_path> <container>:<destination_path>
+
+Naming and tagging containers and images
+- docker run --name <image_name> <image>
+- docker build . -t <tag_name:tag_version>

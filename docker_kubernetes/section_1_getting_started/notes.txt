@@ -1,0 +1,57 @@
+What exactly is docker?
+- Docker is a container technology: used to create and manage containers
+
+What is a container?
+- Container is a standardized unit of software. It is a package of code
+  and dependencies to run that code. e.g., Node.js code + Node.js runtime
+- The same container always yields the exact same application and execution
+  behaviour; no matter where or by whom it might be executed
+
+Why containers?
+- We have different development & production environments. We want to build
+  and test in exactly the same environment as we later run our app
+- We have different development environments within a team/company. Every team
+  member should have the exactly same environment when working on the same
+  project
+- We have clashing tools/versions between different projects. When switching
+  between projects, tools used in project A should not clash with tools used
+  in project B
+
+Why not just virtual machines?
+- With VMs, you have the VM on the host OS, with its own OS
+- One of the biggest problems is that every VM has its own OS wasting a ton
+  of resources!
+- The OS is really duplicated
+- Performance can be degrading
+VMs solve the problem, but not in a perfect way
+
+How do containers solve the problem better than VMs?
+- We still have our host OS
+- We don't install multiple machines on top of the host OS. Instead, we leverage
+  the built-in container support offered by the host OS and run the docker
+  engine on top of the support offered
+- Thus, each container does not individually contain a bloated OS on its own
+- They "might" have a small layer of the OS contained in them, but this is very
+  lightweight as compared to the OS that comes with each VM
+- One major advantage of containers over VMs is that you can configure and
+  describe a container with the help of a configuration file and share the file
+  with others. You can also build the container into and image and share the
+  image with others
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
