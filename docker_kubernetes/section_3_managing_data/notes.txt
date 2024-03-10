@@ -1,0 +1,43 @@
+Content of this chapter:
+- Understanding different kinds of data
+- Images, Containers and Volumes
+- Using arguments and environment variables
+
+What can Data be?
+- Application (Code + Environment; Image layer) [last 2 chapters] - READ ONLY
+- Temporary App Data - READ / WRITE (Container layer)
+    - This is data that is fetched/produced in the running container
+    - This is data that is not needed after the container is stopped and
+      hence discarded
+    - e.g., form user input that might be stored in a temporary file
+- Permanent App Data - READ / WRITE (Container + Volume layer)
+    - This is data that is needed even after the container is stopped
+    - Even more interesting: data that is needed even after container deletion!
+    - e.g., database data, log files, user accounts etc.
+
+Let's take the following example
+- We have a web application that stores user feedback in a file
+- The filename is title.txt where "title" is entered by the user in form input
+- When the user enters a title, the file is created in a "temp" folder
+- If the file created is not already present in a "feedback" folder,
+  it is moved there
+- If the file created is already present in the "feedback" folder, we just
+  leave the file in the "temp" folder and don't move it to the "feedback" folder
+- At the end of the day, we want everything from the "feedback" folder and will
+  discard everything from the "temp" folder
+- This example is a simple way to understand the different kinds of data and
+  contains all the above mentioned data types i.e., Application, Temporary and
+  Permanent data
+
+Stop/Start Container
+- When the container is stopped and restarted, we still have the files in the
+  "temp" folder and the files in the "feedback" folder
+- This is because the container has a read/write layer of the file system unlike
+  the image layer which is read only
+- All writing to the file system is done in the container layer
+
+Delete Container
+- When the container is deleted, the files in the "temp" and "feedback" folder
+  are removed
+- This is because the container layer is removed when the container is deleted
+- The files are not present in the image layer; thus no effect on the image
