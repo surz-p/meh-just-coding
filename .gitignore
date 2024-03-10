@@ -1,5 +1,6 @@
 # Local
 **/.vscode/*
+**/.DS_Store
 
 # Prerequisites
 *.d
