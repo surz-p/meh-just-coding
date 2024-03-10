@@ -111,5 +111,13 @@ Copying files into and out of containers
 - docker cp <source_path> <container>:<destination_path>
 
 Naming and tagging containers and images
-- docker run --name <image_name> <image>
-- docker build . -t <tag_name:tag_version>
+- docker run --name <container_name> <image> gives name to the container
+- docker build . -t <image_name:tag_version> gives a name and version to the image
+
+Sharing Images
+- via Dockerfile + src code
+- via built image + Dockerfile
+  - push to docker hub
+  - push to private registry
+  - docker push image_name (pushes by default to docker hub)
+  - docker push hostname:image_name (pushes to private registry)
