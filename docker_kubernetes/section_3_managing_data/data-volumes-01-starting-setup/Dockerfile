@@ -8,6 +8,10 @@ RUN npm install
 
 COPY . /supernode/
 
-EXPOSE 80
+ARG DEFAULT_PORT=80
+
+ENV PORT=$DEFAULT_PORT
+
+EXPOSE $PORT
 
 CMD [ "npm", "start" ]
