@@ -149,3 +149,89 @@ So how can we solve this?
   In this case, the /supernode/node_modules will win, meaning it wont be overwritten and
   instead it will overwrite what is coming from the bind mount; thus keeping the
   node_modules folder intact
+
+Read Only Volumes
+- A volume can be marked as read only by adding the ":ro" suffix to the volume
+  or bind mount
+- For e.g.,
+  ```docker run -d -p 8080:80 --rm --name ch3bmount -v myVol:/supernode/feedback
+  -v "/Users/sp03/my-repo:/supernode:ro" -v /supernode/node_modules chapter3:nvolumes```
+- The ":ro" suffix tells docker that it is no longer able to write into that folder
+  or its sub folders. However, we do want some data to be written to /supernode/feedback
+  and /supernode/temp folders. So, we can add an anonymous volume for these folders
+  and leave them as read/write and docker will check the longer internal path and
+  give them higher priority so that they can still be used to write data while the
+  rest of the folders are read only
+- For e.g.,
+  ```docker run -d -p 8080:80 --rm --name ch3bmount -v myVol:/supernode/feedback
+  -v "/Users/sp03/my-repo:/supernode:ro" -v /supernode/node_modules
+  -v /supernode/temp chapter3:nvolumes```
+- This will make the bind mount read only and the container will not be able to write
+  to the bind mount, while we will still be able to make changes on the host machine
+
+Points to ponder
+If we are using a bind mount on the source code, why do we need a COPY instruction
+in the Dockerfile if it is anyways going to be overwritten by the bind mount?
+- Yes, we can remove the COPY instruction from the Dockerfile. However, we need to
+  remember that bind mount was added by us to be able to make changes to the source
+  during development, so that we omit the process of rebuilding the image every time
+  there is a minor change to the src code. But, when we are ready to deploy the app,
+  we will not require constant changes to the src code and we will want to use the
+  COPY instruction in the Dockerfile to copy the src code into the image.
+- I personally also think that using a bind mount will only let you work locally.
+  If the project/image needs to be shared with someone else, they will need an image
+  with the src code in it. So, the COPY instruction will come in handy at such times
+
+dockerignore
+- The .dockerignore file is similar to the .gitignore file and is used to ignore
+  files and folders that we do not want to be copied into the image by the COPY
+  instruction
+
+ARGuments and ENVironment Variables
+- Environment Variables
+- Docker supports build time arguments and run time environment variables
+- Arguments are set via the --build-arg option and they are available inside of
+  the Dockerfile and NOT accessible via CMD line or any application code
+- Environment variables are available in the Dockerfile and the application code
+  and can be set via the ENV instruction in the Dockerfile or via the --env flag
+  on docker run; i.e., docker run --env <key>=<value>
+- For e.g.,
+  ```docker run -d -p 8080:8765 --env PORT=8765 --rm --name ch3env chapter3:env```
+  This will set the PORT environment variable to 8765, even if you mention the
+  ENV instruction in the Dockerfile like ENV PORT=80; The 8765 in command line
+  will override the 80 in the Dockerfile
+- If there is no override via the command line, then the value in the Dockerfile
+  will be used as the default PORT value
+- You can also use "-e" instead of "--env" in the command line and have any number
+  of environment variables set in the command line like
+  "docker run -e PORT=8765 -e OPT=debug ... -e KEY=VAL <image>"
+- You can also use the ".env" file to set environment variables and use the --env-file
+  flag to set the environment variables from the .env file
+- !!! IMPORTANT NOTE !!! (Environment Variables and Security)
+  Depending on which kind of data you're storing in your environment variables, you
+  might not want to include the secure data directly in your Dockerfile
+  Instead, go for a separate environment variables file which is then only used at
+  runtime (i.e. when you run your container with docker run)
+  Otherwise, the values are "baked into the image" and everyone can read these values
+  via "docker history <image>"
+
+- Arguments
+- Arguments are defined in the Dockerfile using the ARG instruction for flexibility
+  and are set at build time using the --build-arg flag
+- An ARG key can not be used in the CMD instruction or in the application code
+  because that is only available at build time
+- For e.g.,
+  ...
+  ARG DEFAULT_PORT=80
+  ...
+  ENV PORT=$DEFAULT_PORT
+  ...
+  and then build it for multiple ports like
+  on PROD = docker build . -t myapp:prod # build with the default port 80
+  on DEV = docker build . -t myapp:dev --build-arg DEFAULT_PORT=8765 # with port 8765
+  Now we have two different images, built differently for different environments!
+
+- !!! TIP !!!
+  Place the ARG and ENV instructions at the bottom of the Dockerfile so that a new
+  build with a different variable value does not invalidate the cache for the rest of
+  the instructions in the Dockerfile, that are followed after these instructions
