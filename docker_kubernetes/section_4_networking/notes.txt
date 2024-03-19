@@ -1,0 +1,161 @@
+This module covers the core topic of "Containers & Networks"
+We'll cover the following topics:
+- Container & External Networks
+- Connecting Containers with Networks
+
+Let's understand what is meant by "Container & Networks"
+The first type of communication
+- Assume a container with our app inside it
+- Let's say our app needs to talk to an API (any website on open internet)
+- In our demo app, we use the starwars API, fetch data from it, and expose
+  the data in our own API from our app
+- Which means we will actually interact with open world URL from our app
+- This would involve a HTTP request going from inside of our container to
+  the outside of the container
+- This is a good example to understand the concept of "Container & Networks"
+
+A second type of communication
+- Not just the above example, where we communicate with the open internet,
+  but there is also another possibility
+- We might have a service running on our host machine (not in a container
+  itself), and we want to communicate with that service from inside of our
+  container
+- For e.g., let's say our app needs to talk to the MongoDB on our machine
+
+A third type of communication
+- The third type of communication is when we have multiple containers and
+  we want them to talk to each other
+- We might have a SQL database inside another container, (or any other service
+  inside another container for the sake of the example), and we want our app
+  to talk to that service
+
+The examples so far in a nutshell
+- Requests from container to WWW
+- Requests from container to host machine
+- Requests from container to container
+
+Magic! (Container to WWW Communication)
+- By default any interaction with WWW is possible from inside of a container
+- You don't need any special setup/code to make that happen
+- Sending HTTP requests from within a container works exactly like how it
+  would, if there was no docker involved
+
+!!! Some Docker unrelated stuff - MongoDB !!!
+- To follow along with the course content, I manually installed MongoDB on
+  my MAC by following the instructions mentioned at -
+  https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-os-x/
+- By running the MongoDB service, I was able to get the starwars api demo app
+  up and working without any containers
+- How to do it with the help of containers is followed later
+
+Container to Host Communication
+- This is not so straight forward, but there is a way to do it
+- We replace the instances of "localhost" in the source code with the literal
+  "host.docker.internal"
+- Docker will automatically resolve "host.docker.internal" to the IP address
+  of the host machine as seen from inside of a container
+
+Container to Container Communication
+A Basic Solution
+- First run the service in a container. In our case spin up a mongodb container
+- You can do a small hack here - You can extract the IP address of the mongodb
+  container and use it in the source code of the app (i.e., replace it with the
+  "host.docker.internal" or "localhost" literals)
+- To find the IP address, do
+  "docker inspect <container_id>"
+  From the information displayed, find the "IPAddress" of the container in the
+  "NetworkSettings" section
+- This does the work, but is not the best solution. Everytime the IPAddress of
+  the mongodb container is changed, we need to build a new image for the app
+  with the new IP address hardcoded into the source code. This can become quite
+  cumbersome
+
+An Elegant Solution
+- Thankfully there is an easier way!
+- With Docker we can create a "Docker Network", or simply a Network
+- The idea is to put the containers that need to talk to each other in the same
+  network, when running them, with the command
+  "docker run --network <network_name>"
+- Docker takes care of the IP lookup and resolution for us, which we manually
+  did in the previous solution
+- !!! IMPORTANT NOTE !!!
+  Unlike volumes, networks are not automatically created by Docker with run cmd
+  So, running this "docker run --network <network_name> <image_name>" would fail
+  with the error:
+  "docker: Error response from daemon: network <network_name> not found."
+  Painfully, this creates the container and then exits with the error, so you
+  have to manually remove the container with "docker rm <container_id>"
+- We use the "docker network create <network_name>" command to create a network
+  For e.g., "docker network create myapp-network"
+  As simple as that, no additional fuss required
+- The important thing here is that for the containers to talk to each other, the
+  domain in the source code should be the name of the container that it wants to
+  talk to, from the same network
+  For e.g., if a container is named "mongodb" and the app container wants to talk
+  to "mongodb" container, then the domain in the source code should be changed to
+  ___someMongoConnectFunction(mongodb://"mongodb":27017/someDbName)___ of course
+  without the quotes
+- Previously we saw
+    - someMongoConnectFunction(mongodb://host.docker.internal:27017/someDbName)
+        considering MongoDB was running on local machine (host)
+    - someMongoConnectFunction(mongodb://Container_IP_Manual:27017/someDbName)
+        considering we manually extracted the IP address of the container
+  Now we replace it with the name of the container (from the same network)
+    - someMongoConnectFunction(mongodb://Just_Container_Name:27017/someDbName)
+- !!! IMPORTANT NOTE !!!
+  Thus it is absolutely necessary to create a network for two or more containers
+  to communicate with each other or manually lookup the IP of the containers
+
+Point(s) to Note!
+- When we ran the MongoDB container, we never published any port with the "-p"
+  flag
+- This is only required when there is a communication from the host machine to
+  the container
+- Thus for any containers communicating with each other inside the same network,
+  we don't need to publish any ports
+
+How Docker resolves IP Addresses
+- !!! IMPORTANT NOTE !!!
+  Docker never replaces the source code with the IP address of the container
+  when it is running
+- So, it will not read your source code, see the container name and plug-in the
+  IP address of the container
+- Instead, Docker "OWNS" the environment in which your application runs
+- If there is a request that leaves the container, then Docker is aware of that!
+- It is at this point that Docker resolves the address or container name or
+  host docker internal and replace it with the actual IP Address
+- This is an important point to remember
+
+Some personal observations
+- I observed the following while working with this chapter, some of it may need
+  confirmation
+- mongo docker image creates containers that use unnamed volumes
+- these look cryptic (unnamed volumes), but it seems to me that these are
+  persistent between container stop/start i.e., when I stop/start the same
+  container, the data is still there and there are no dangling volumes
+
+Notes from the lecture (not covered in video / nor studied in-detail by me)
+Docker Network Drivers
+- Docker Networks actually support different kinds of "Drivers" which influence
+  the behavior of the Network
+- The default driver is the "bridge" driver - it provides the behavior shown in
+  this module (i.e. Containers can find each other by name if they are in the
+  same Network)
+- The driver can be set when a Network is created, simply by adding the
+  --driver option
+- docker network create --driver bridge my-net
+- Of course, if you want to use the "bridge" driver, you can simply omit the
+  entire option since "bridge" is the default anyways
+- Docker also supports these alternative drivers - though you will use the
+  "bridge" driver in most cases:
+- host: For standalone containers, isolation between container and host system
+  is removed (i.e. they share localhost as a network)
+- overlay: Multiple Docker daemons (i.e. Docker running on different machines)
+  are able to connect with each other. Only works in "Swarm" mode which is a
+  dated / almost deprecated way of connecting multiple containers
+- macvlan: You can set a custom MAC address to a container - this address can
+  then be used for communication with that container
+- none: All networking is disabled
+- Third-party plugins: You can install third-party plugins which then may add
+  all kinds of behaviors and functionalities
+- As mentioned, the "bridge" driver makes most sense in the vast majority of cases
