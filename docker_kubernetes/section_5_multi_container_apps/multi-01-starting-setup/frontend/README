@@ -1,0 +1,47 @@
+- we need to set up persistent data (tbd)
+- we need live changes to the code (tbd)
+
+
+- example (check README.md for in-built instructions about react)
+  - this is my own try
+  - build the image
+  - we already know backend is talking to mongodb on port 27017
+  - we need to talk to the backend on port 80 which is published at startup
+  - we need to expose the frontend on port 3000
+  - The command I came up with would be
+    docker run --rm -d -p 3000:3000 --name frontend \
+    --network ch5net frontend_img
+
+
+HERE ENDS MY OWN SETUP AND TESTING, NOW COMES THE LECTURE'S INSTRUCTIONS
+
+Phase 1
+- Assuming mongodb_phase1 and backend_phase1 are already running
+- We need to change localhost to backend_phase1 wherever there are calls to
+  localhost in the source code of the react application
+- We build the image with these change
+- To spawn the container, we run
+  docker run -d --rm --name frontend_phase1 -p 3000:3000 \
+  --network ch5net frontend_img:phase_1
+- !!! At this point, the frontend will fail because it tries to connect to
+  http://backend_phase1/goals from the src code. But our browser has no
+  idea what backend_phase1 is. !!!
+  So, this is not the ideal way to do things.
+  We go back to localhost from backend_phase1, i.e., undo step 2
+- This also means that backend_phase1 needs to be started with the ports
+  published
+
+Phase 2 (Undo step 2)
+- Revert all backend_phase1 instances to localhost
+- docker run -d --rm --name frontend_phase2 -p 3000:3000 frontend_img:phase_2
+- Notice that we removed the --network flag. This is a react app, and it has
+  nothing to do with servers. It is a client-side application. And so we
+  really don't need it to interact with any of the containers (backend/mongo)
+  It only interacts directly with the browser on localhost:3000
+
+<AT THIS POINT, APP SHOULD BE STABLE>
+
+Phase 3
+- No change in frontend
+
+<AT THIS POINT, APP SHOULD BE STABLE>

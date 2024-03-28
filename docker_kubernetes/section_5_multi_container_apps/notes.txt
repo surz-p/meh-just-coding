@@ -1,0 +1,20 @@
+This chapter focuses more on a hands-on approach on the topics covered so far
+We will look into "Building More Realistic Apps" (Multi-Container)
+
+We will see
+- Combining multiple services to one app
+- Working with multiple containers
+
+Demo in this chapter
+- Contains 3 building blocks
+- 1. Mongodb database
+- 2. NodeJS REST API
+- 3. React SPA Frontend
+
+Some points to keep in mind before dockerizing these 3 units
+- We need to have persistent data when dealing with Mongodb container
+- We need to have restricted access to the database (user + pwd)
+- We need to have persistent data for log data in NodeJS container
+- We want live source code changes to reflect immediately in NodeJS box
+- We want live source code changes to reflect immediately in React box
+
