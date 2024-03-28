@@ -1,0 +1,58 @@
+- we need to set up persistent data
+  - maybe a named volume?
+  - maybe a bind mount?
+  - bind mount overwrites emptiness from local, so maybe volume?
+- we need secure auth in place
+  - maybe an .env file with the key-value pairs for username and pwd
+
+- example (documentation: https://hub.docker.com/_/mongo)
+  - This is my own try
+  - docker run -d --rm --name mongodb --env-file ./.env \
+    -v mongodatadb:/data/db \
+    -v mongodataconfig:/data/configdb \
+    # -v "/Users/sp03/Downloads/Self/Learning/meh-just-coding/docker_kubernetes\
+    # /section_5_multi_container_apps/multi-01-starting-setup/database/mountdir"\
+    # :"/data" \
+    --network ch5net mongo
+  - I noticed that binding to "/data/db" throws an error: stackoverflow.com
+    /questions/67498836/docker-chown-changing-ownership-of-data-db-operation-not
+    -permitted
+  - So, we bind to "/data" instead
+  - Maybe it also makes sense to not do the bind mount? because it overwrites?
+    And just use two named volumes for the /data/db and /data/configdb dirs?
+  - I also realized that when using the username/pwd combo on mongo, the
+    connection failed when I awoke my MAC after a day. I checked the qna
+    section to find out that the connect() method needs to take a modified URL
+    'mongodb://user:pwd@mongodb:27017/course-goals?authSource=admin'
+    where user and pwd are user and pwd mentioned in the .env file
+
+HERE ENDS MY OWN SETUP AND TESTING, NOW COMES THE LECTURE'S INSTRUCTIONS
+- Create a network first
+  docker network create ch5net
+
+Phase 1
+- Run the mongodb container
+  docker run -d --rm --name mongodb_phase1 --network ch5net mongo
+
+Phase 2 (Check frontend and backend folders)
+- No changes, nothing to do here
+- docker run -d --rm --name mongodb_phase2 --network ch5net mongo
+
+<AT THIS POINT, APP SHOULD BE STABLE>
+
+Phase 3 (Data Persistence and Access rights for mongodb)
+- For data persistence using a named volume does the trick
+- docker run -d --rm --name mongodb_phase3 --network ch5net \
+  -v mongodatadb:/data/db mongo
+- Also, we are looking for authentication, so we will use the --env-file
+  option to pass a file that contains the environment variables i.e.,
+  MONGO_INITDB_ROOT_USERNAME and MONGO_INITDB_ROOT_PASSWORD
+- docker run -d --rm --name mongodb_phase3 --network ch5net \
+  -v mongodatadb:/data/db --env-file ./env mongo
+- !!! IMPORTANT NOTE !!!
+  If the volume was already set up immediately after step 2, remove the volume
+  and recreate it with the new command that also has the --env-file option
+- This also means, the connection string in the backend should be modified
+  to accommodate the username and password
+
+<AT THIS POINT, APP SHOULD BE STABLE>

@@ -1,0 +1,69 @@
+- we need to set up persistent data
+  - set up volume for logs that are created by the app
+- we need live changes to the code
+  - I will do it later using nodemon
+  - Did it in the example below on my own B-)
+
+- example
+  - This is my own try
+  - We first change "localhost" -> "mongodb" in src code to connect to mongodb
+    container
+  - I also add the nodemon package to pick up live changes; so the entrypoint
+    is changed to "npm start" from "node app.js"
+  - We build the image with name "backend_img"
+  - docker run -d -p 8080:80 --rm --name backend \ <<< this is wrong !!!
+    -v backendlogs:/backend/logs \
+    -v /backend/node_modules \
+    -v $(pwd):/backend \
+    --network ch5net backend_img
+  - instead use:
+    docker run -d -p 80:80 --rm --name backend \
+    -v backendlogs:/backend/logs \
+    -v /backend/node_modules \
+    -v $(pwd):/backend \
+    --network ch5net backend_img
+  - This is important because, the frontend application makes requests to
+    "http://localhost/goals" and if we change the port to 8080, the requests
+    will fail (default port is 80, not 8080)
+  - I added a bind mount so that changes can reflect directly and also added
+    an anonymous volume for node_modules so that they are not overwritten
+  - Just for some testing, I added a console.log(count) in GET /goals route
+    to see if nodemon works, and it does
+  - This also proves that the bind mount is working as the changes are
+    reflected in the container
+
+HERE ENDS MY OWN SETUP AND TESTING, NOW COMES THE LECTURE'S INSTRUCTIONS
+
+Phase 1
+- Assuming the network has already been set up in the database folder
+- We need to change localhost:27017 to mongodb:27017 in the connection string
+  in the source code of the backend app
+- We then build the image
+- docker run -d --rm --name backend_phase1 \
+  --network ch5net backend_img:phase_1
+  To test, shell into backend_phase1 and try a ping to mongodb_phase1
+  $ ping mongodb_phase1
+  PING mongodb_phase1 (172.20.0.2) 56(84) bytes of data.
+  64 bytes from mongodb_phase1.ch5net (172.20.0.2): icmp_seq=1 ttl=64 time=0.096 ms
+  ...
+
+Phase 2 (due to failing Phase 1 in frontend)
+- Because the frontend app runs on the browser and fails to resolve what
+  http://backend_phase1/goals is, we switch to localhost in the frontend app and
+  instead publish the port before spawning the container
+- docker run -d --rm --name backend_phase2 -p 80:80 \
+  --network ch5net backend_img:phase_2
+
+<AT THIS POINT, APP SHOULD BE STABLE>
+
+Phase 3 (comply with mongodb changes)
+- We need to change the following in the backend app to comply with changes
+  made from the mongodb container
+- Point to the right container name in the connection string
+  'mongodb://mongodb_phase3:27017/course-goals'
+- Add the username, password, and authSource to the connection string
+  'mongodb://notsp03:n0tsec4et@mongodb_phase3:27017/course-goals?authSource=admin'
+- docker run -d --rm --name backend_phase3 -p 80:80 \
+  --network ch5net backend_img:phase_3
+
+<AT THIS POINT, APP SHOULD BE STABLE>
