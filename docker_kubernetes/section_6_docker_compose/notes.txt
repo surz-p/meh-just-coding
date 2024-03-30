@@ -1,0 +1,98 @@
+Elegant Multi Container Orchestration - docker-compose
+- In this chapter we learn what docker-compose is
+- We will understand this with the help of an example
+
+What is Docker Compose?
+- It is a tool that allows you to replace docker "build" and "run" commands
+  with just one config file and a set of orchestration commands to start all
+  these containers at once and build all necessary images if required;
+  And similarly just one command to bring everything down
+
+What Docker Compose is not?
+- It does not replace Dockerfiles. It works with the Dockerfiles in tandem
+- It does not replace images/containers
+- It is not suited to manage multiple containers on different hosts
+
+How to use Docker Compose?
+- The most important thing to define in a docker-compose files are services
+  which can be translated to containers
+- You can set volumes, env vars, networks, publish ports etc under each service
+  Basically you can replicate anything that you can do on docker cli
+- The file name is docker-compose.yml or docker-compose.yaml
+- You always start by mentioning a version. The version is not the version of
+  the app, but the version of the docker-compose specification we want to use
+  The version we define has an effect on the features we can use in the file
+- Documentation can be found at: https://docs.docker.com/compose/compose-file/
+- There are slight deviations in the lecture vs documentation. For best results
+  always refer to the documentation
+- Follow up with the services tag after the version to fill up details about
+  individual services/containers
+- Continue with the image tag for the service
+- !!! IMPORTANT NOTE !!!
+  By default when the services are stopped, they are automatically removed. So
+  no need to explicitly mention the --rm flag
+- Similarly the detached flag is also not required. It can be when invoking the
+  startup command
+- Follow up with volumes (notice plural) to add the relevant volumes needed
+- !!! IMPORTANT NOTE !!!
+  For named volumes, you should add a volumes tag, after the services tag, and
+  mention the volume-name that you've used in the service config under this tag
+  For example:
+  ```
+  services:
+    my-service:
+      volumes:
+        - named-volume:/path/in/container
+  ...
+  volumes:
+    named-volume:
+  ```
+  If the same volume name is used in multiple services, it's shared between them
+  Anonymous volumes and bind mounts need not be specified here
+  Anonymous volumes are not automatically removed on "docker compose down"
+  Bind mounts can be used by specifying relative paths on host system unlike the
+  plain docker command which required absolute paths
+  e.g.,
+  ``` docker run -v $(pwd):/backend ... ```
+  vs
+  ```
+  volumes:
+    - ./backend:/backend # docker compose allows relative paths for bind mounts
+  ```
+- Follow up with the env_file required
+- !!! IMPORTANT NOTE !!!
+  You CAN add a networks tag to define all the networks the container is part of
+  But this is not really required as docker-compose creates a default network
+  for all the services in the docker-compose file and adds them to it
+- Instead of using the image tag to use an already existing image, you can use
+  the build tag and provide the path for the Dockerfile to build-and-use image
+  TIP: Read documentation about the context and dockerfile tags for more usage
+- Follow up with ports (plural) to expose the ports
+- Follow up with the depends_on tag which is used to mention which service needs
+  to be set up and already running before the current service can be spawned up
+- !!! IMPORTANT NOTE !!!
+  When "docker compose up" is invoked, it is very important to notice that the
+  other containers can be communicated with using the service name defined in
+  the docker-compose file. Docker Compose automatically sets this mapping by
+  itself. Therefore, even though the container that is just created has a long
+  name with the prefix of the directory name, (section_6_docker_compose_mongodb_1)
+  we can simply use "mongodb" in the source code to reference this container
+  i.e., "mongodb://user:pwd@mongodb:27017" in the source code
+  and no need to use "mongodb://user:pwd@section_6_docker_compose_mongodb_1:27017"
+- If you want to use the container name without the directory prefix, use the
+  container_name tag in the docker compose file
+  ```
+  backend:
+    ...
+    container_name: "mongodb" # sets the name of the container to mongodb
+                              # and not section_6_docker_compose_mongodb_1
+  ```
+- Follow with tags stdin_open:true and tty:true to set up an interactive session
+  resembling that of the "--it" flag in the docker run command
+- Side Note: To just build/force build the images specified in the build tag in
+  the docker-compose file, use "docker compose build" command
+- To start services with Docker Compose, "docker compose up"
+
+Real Time Example
+- Let's pull the same dir structure from the previous chapter and work on it
+  to set up the Docker Compose file instead of running a dozen docker commands
