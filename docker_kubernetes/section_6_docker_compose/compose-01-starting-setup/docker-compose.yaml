@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: "mongo"
+    volumes:
+      - mongodatadb:/data/db
+    env_file:
+      - ./database/.env
+
+  backend:
+    build: "./backend"
+    ports:
+      - "80:80"
+    volumes:
+      - ./backend:/backend # docker compose allows relative paths for bind mounts
+      - backendlogs:/backend/logs
+      - /backend/node_modules
+    depends_on:
+      - "mongodb"
+
+  frontend:
+    build: "./frontend"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/frontend/src # again
+    environment:
+      - WATCHPACK_POLLING=true
+    depends_on:
+      - backend
+
+volumes:
+  mongodatadb:
+    external: true
+  backendlogs:
+    external: true
