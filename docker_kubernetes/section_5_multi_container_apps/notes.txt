@@ -18,3 +18,7 @@ Some points to keep in mind before dockerizing these 3 units
 - We want live source code changes to reflect immediately in NodeJS box
 - We want live source code changes to reflect immediately in React box
 
+Notes
+- Check README files in all three folders; database, backend and frontend
+  for more detailed notes
+- Note that it's just README, not README.md

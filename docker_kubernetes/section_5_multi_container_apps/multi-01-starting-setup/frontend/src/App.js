@@ -12,6 +12,8 @@ function App() {
   useEffect(function () {
     async function fetchData() {
       setIsLoading(true);
+      // next-line-added-to-test-bind-mount
+      console.log('fetching data, visible in browser...')
 
       try {
         const response = await fetch('http://localhost/goals');
@@ -37,6 +39,8 @@ function App() {
 
   async function addGoalHandler(goalText) {
     setIsLoading(true);
+    // next-line-added-to-test-bind-mount
+    console.log('adding data, visible in browser...')
 
     try {
       const response = await fetch('http://localhost/goals', {
@@ -76,6 +80,8 @@ function App() {
 
   async function deleteGoalHandler(goalId) {
     setIsLoading(true);
+    // next-line-added-to-test-bind-mount
+    console.log('deleting data, visible in browser...')
 
     try {
       const response = await fetch('http://localhost/goals/' + goalId, {

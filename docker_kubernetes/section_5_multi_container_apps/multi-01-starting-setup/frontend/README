@@ -45,3 +45,23 @@ Phase 3
 - No change in frontend
 
 <AT THIS POINT, APP SHOULD BE STABLE>
+
+Phase 4 (Backend App live source code changes & logs persistence)
+- No changes, nothing to do here
+
+<AT THIS POINT, APP SHOULD BE STABLE>
+
+Phase 5 (React app live source code changes)
+- We only add a bind mount on the src/ folder
+- We don't need nodemon because the react app set up has its own watcher which
+  continuously checks for changes in files, so that new changes are picked up
+  automatically
+- I also noticed that the react changes were not being picked up on MacOS.
+  Searched a few qnas online and found that adding the following environment
+  variable helps. I tested it and it works as expected
+  `WATCHPACK_POLLING=true`
+- docker run -d --rm --name frontend_phase5 -p 3000:3000 \
+  -v $(pwd)/src:/frontend/src
+  -e WATCHPACK_POLLING=true frontend_img:phase_5
+
+<FIN, WE ACHIEVED WHAT WE WANTED>
