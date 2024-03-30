@@ -67,3 +67,34 @@ Phase 3 (comply with mongodb changes)
   --network ch5net backend_img:phase_3
 
 <AT THIS POINT, APP SHOULD BE STABLE>
+
+Phase 4 (Backend App live source code changes & logs persistence)
+- We want the log files to persist even after shutdowns
+- We want the changes made to the backend be directly picked up by the
+  container (using nodemon)
+- To save the logs, we create a named volume at /backend/logs
+- To pick up changes, we add nodemon to the package.json; add a "start" script
+  in package.json as "nodemon --legacy-watch app.js"; and change the CMD to
+  "npm start"
+- We also need to add a bind mount from our local machine to the WORKDIR in
+  the container (on /backend/)
+- An important takeaway here would be to save the /backend/node_modules in
+  the container so that it doesn't get overwritten by the bind mount
+- !!! IMPORTANT NOTE !!!
+  I observed that an empty node_modules dir was being created on the host
+  system after binding on /backend; I tried many questions, articles, blogs but
+  could not find an answer for why this was happening
+- However, after eternal searching, I found the following link which helps
+  explain this behaviour: https://github.com/moby/moby/issues/38564
+- docker run -d --rm --name backend_phase4 -p 80:80 \
+  -v $(pwd):/backend \
+  -v backendlogs:/backend/logs \
+  -v /backend/node_modules \
+  --network ch5net backend_img:phase_4
+
+<AT THIS POINT, APP SHOULD BE STABLE>
+
+Phase 5 (React app live source code changes)
+- No changes, nothing to do here
+
+<FIN, WE ACHIEVED WHAT WE WANTED>

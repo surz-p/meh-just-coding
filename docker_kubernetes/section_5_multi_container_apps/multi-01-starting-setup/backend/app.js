@@ -26,7 +26,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// next-line-added-to-test-bind-mount
+let count = 0;
 app.get('/goals', async (req, res) => {
+  // next-line-added-to-test-bind-mount
+  console.log(`GOT A NEW INCOMING REQUEST... ${++count}`);
   console.log('TRYING TO FETCH GOALS');
   try {
     const goals = await Goal.find();
@@ -84,7 +88,7 @@ app.delete('/goals/:id', async (req, res) => {
 });
 
 mongoose.connect(
-  'mongodb://notsp03:n0tsec4et@mongodb_phase3:27017/course-goals?authSource=admin',
+  'mongodb://notsp03:n0tsec4et@mongodb_phase5:27017/course-goals?authSource=admin',
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,

@@ -48,7 +48,7 @@ Phase 3 (Data Persistence and Access rights for mongodb)
   option to pass a file that contains the environment variables i.e.,
   MONGO_INITDB_ROOT_USERNAME and MONGO_INITDB_ROOT_PASSWORD
 - docker run -d --rm --name mongodb_phase3 --network ch5net \
-  -v mongodatadb:/data/db --env-file ./env mongo
+  -v mongodatadb:/data/db --env-file ./.env mongo
 - !!! IMPORTANT NOTE !!!
   If the volume was already set up immediately after step 2, remove the volume
   and recreate it with the new command that also has the --env-file option
@@ -56,3 +56,13 @@ Phase 3 (Data Persistence and Access rights for mongodb)
   to accommodate the username and password
 
 <AT THIS POINT, APP SHOULD BE STABLE>
+
+Phase 4 (Backend App live source code changes & logs persistence)
+- No changes, nothing to do here
+
+<AT THIS POINT, APP SHOULD BE STABLE>
+
+Phase 5 (React app live source code changes)
+- No changes, nothing to do here
+
+<FIN, WE ACHIEVED WHAT WE WANTED>
