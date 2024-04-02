@@ -87,6 +87,13 @@ How to use Docker Compose?
     container_name: "mongodb" # sets the name of the container to mongodb
                               # and not section_6_docker_compose_mongodb_1
   ```
+  Similary you can also name volumes if you don't want the default dir prefix
+  ```
+  volumes:
+  mongodatadb:
+    name: "mongodatadb"
+    external: true
+  ```
 - Follow with tags stdin_open:true and tty:true to set up an interactive session
   resembling that of the "--it" flag in the docker run command
 - Side Note: To just build/force build the images specified in the build tag in
