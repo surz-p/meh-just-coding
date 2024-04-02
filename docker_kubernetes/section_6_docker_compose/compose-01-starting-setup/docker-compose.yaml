@@ -32,6 +32,8 @@ services:
 
 volumes:
   mongodatadb:
+    # name: "mongodatadb"
     external: true
   backendlogs:
+    # name: "backendlogs"
     external: true
