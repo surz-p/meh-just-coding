@@ -1,0 +1,51 @@
+Utility Containers is not a real docker term
+
+- So far we've seen application containers where we have an environment and app
+- Utility Containers are the ones with just the environment where we can run
+  custom commands
+  e.g., docker run <my-npm-img> init
+- The above example shows that for us to even create a package.json file when
+  writing a node.js application, we need to have npm installed (npm init)
+- This beats the purpose of using a docker; where we wanted to initially eliminate
+  the need of having to install npm or node on our local machine
+- This is where utility containers come into action
+
+How to create a utility container?
+- Create a Dockerfile without an entrypoint and build the image: my-node-util-img
+- Run the container with a custom command
+  e.g., docker run <my-node-util-img> npm init
+- Notice the commands after the image name. These are the custom commands that
+  we want to run in the container
+- Use a bind mount to access the newly created package.json file on our host
+  e.g., docker run -it -v $(pwd):/supernode <my-node-util-img> npm init
+
+- Right now the above image lets us run any command within the container. This
+  is not a good practice as we could accidentally delete files with the bind mount
+  leading to loss of data
+- So it might be a good idea to restrict the commands we can use with the utility
+  containers; i.e., prepend "npm" to the container commands and we run only the
+  straightforward command without "npm"
+  e.g., docker run -it -v $(pwd):/supernode <my-node-util-img> init # npm init
+  or docker run -it -v $(pwd):/supernode <my-node-util-img> test # npm test
+  etc.
+- We use the ENTRYPOINT instruction for this purpose
+- The difference between CMD and ENTRYPOINT is that with CMD we can override the
+  command specified in the Dockerfile when running the container with additional
+  commands after the image name
+  e.g., docker run <my-node-util-img> npm init; "npm init" overwrites the CMD
+- With ENTRYPOINY, we can append any commands after the image name to the entrypoint
+  command specified in the Dockerfile
+  ```
+  FROM node:alpine
+  ...
+  ENTRYPOINT ["npm"]
+  ```
+  e.g., docker run <my-node-util-img> init; "init" is appended to "npm" making it
+  "npm init" as a whole
+
+Change to docker-compose to shorten your long docker commands
+- The only difference is we can not append our command to docker compose command
+  e.g., "docker compose up init" would not work
+- So we leverage the "docker compose run" command which lets us target a single
+  service defined inside the docker-compose.yaml file and run a custom command
+  e.g., docker compose run my-npm-serv init
