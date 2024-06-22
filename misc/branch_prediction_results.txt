@@ -1,0 +1,9 @@
+without sorting; branch prediction penalties!
+1719069761 : 950588
+1719069768 : 752570
+
+sorting; expensive!
+
+after sorting; branch prediction works!
+1719069788 : 961748
+1719069791 : 175477
