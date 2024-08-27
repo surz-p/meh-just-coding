@@ -1,0 +1,16 @@
+Refer https://github.com/surz-p/meh-just-coding/pull/41 for Motivation and Limitations.
+
+In this director, I try to implement a search functionality on the "Press Releases" sources
+of the South Central Railway website.
+
+Basic idea proposal:
+- using the HTML of the "Press Releases" page, I will try to get the URL of each press release.
+- for each URL, I will try to fetch the content.
+- on the retrieved content, I will try to search for an input keyword.
+
+Design thoughts:
+- do I perform the URL fetch in parallel?
+- do I store the content or just search on the fly?
+
+Implementation thoughts:
+- which language to use?
