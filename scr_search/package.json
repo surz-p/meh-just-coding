@@ -1,0 +1,23 @@
+{
+  "name": "scr_search",
+  "version": "1.0.0",
+  "description": "I try to implement a search functionality on the \"Press Releases\" sources",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:surz-p/meh-just-coding.git"
+  },
+  "author": "Suraj P",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/surz-p/meh-just-coding/issues"
+  },
+  "homepage": "https://github.com/surz-p/meh-just-coding/scr_search#readme",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "pino-pretty": "^11.2.2"
+  }
+}
