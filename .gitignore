@@ -1,5 +1,9 @@
 # Self
 *node_modules*
+scr_search/**
+!scr_search/**/README
+!scr_search/**/package.json
+!scr_search/**/index.js
 
 # Local
 **/.vscode/*
