@@ -4,6 +4,7 @@ scr_search/**
 !scr_search/**/README
 !scr_search/**/package.json
 !scr_search/**/index.js
+!scr_search/**/yarn.lock
 
 # Local
 **/.vscode/*
