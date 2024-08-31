@@ -1,5 +1,6 @@
 const axios = require('axios');
 const fs = require('fs');
+const readline = require('readline');
 
 // source url:
 // https://scr.indianrailways.gov.in/view_section.jsp?fontColor=black&backgroundColor=LIGHTSTEELBLUE&lang=0&id=0,5,268
@@ -57,7 +58,7 @@ async function search() {
             }
         }
 
-        const regexForSearch = /12749/gi;
+        // regexForSearch will be read from user input
         let numberSearchResults = 0;
 
         pressReleasesContent.forEach((article, idx) => {
@@ -91,4 +92,15 @@ async function search() {
     }
 }
 
-search();
+let regexForSearch = 'zombie';
+
+const rli = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+rli.question('Enter the search string: ', searchString => {
+    regexForSearch = new RegExp(searchString, 'gi');
+    rli.close();
+    search();
+});
