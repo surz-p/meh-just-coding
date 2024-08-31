@@ -70,7 +70,7 @@ async function search() {
             const isRegexMatched = articleContent.match(regexForSearch);
             if (isRegexMatched) {
                 numberSearchResults++;
-                console.log(`"${regexForSearch.source}" was found in ${URLToPromisesMap[idx]}`);
+                console.log(`${numberSearchResults}. "${regexForSearch.source}" was found in ${URLToPromisesMap[idx]}`);
             }
         });
 
